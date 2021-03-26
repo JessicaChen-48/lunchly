@@ -56,6 +56,44 @@ class Customer {
     return new Customer(customer);
   }
 
+  /** get top 10 customers by most reservations */
+
+  static async getTop10() {
+    const cusResults = await db.query(
+      `SELECT id,
+                  first_name AS "firstName",
+                  last_name  AS "lastName",
+                  phone,
+                  notes
+           FROM customers`
+    );
+    console.log(cusResults)
+
+    const resResults = await db.query(
+      `SELECT customer_id, count(*)
+      FROM reservations
+      GROUP BY customer_id
+      ORDER BY count(*) DESC
+      LIMIT 10`
+    );
+
+    const reservations = resResults.rows
+    console.log("class reservations:", reservations)
+
+    return reservations
+
+    // for (let r of reservations) {
+
+    // }
+
+    // [{customer_id: 54, count:6},{customer_id} ]
+
+    // customer.reservations = reservations
+    // return results.rows.map((c) => new Customer(c));
+  }
+
+  /** search for customer by name */
+
   static async searchByName(firstName, lastName = "") {
     let customer = undefined;
     if (firstName && lastName) {
@@ -66,9 +104,9 @@ class Customer {
                     phone,
                     notes
             FROM customers
-            WHERE first_name = $1
-            AND last_name = $2`,
-        [firstName, lastName]
+            WHERE LOWER(first_name) = $1
+            AND LOWER(last_name) = $2`,
+        [firstName.toLowerCase(), lastName.toLowerCase()]
       );
       customer = results.rows[0];
     } else {
@@ -79,9 +117,9 @@ class Customer {
                     phone,
                     notes
             FROM customers
-            WHERE first_name = $1
-            OR last_name = $1`,
-        [firstName]
+            WHERE LOWER(first_name) = $1
+            OR LOWER(last_name) = $1`,
+        [firstName.toLowerCase()]
       );
       customer = results.rows;
       return customer;
