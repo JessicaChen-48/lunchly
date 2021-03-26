@@ -82,15 +82,20 @@ router.post("/:id/add-reservation/", async function (req, res, next) {
   return res.redirect(`/${customerId}/`);
 });
 
- router.post("/search", async function (req, res, next) {
-  const searchName = req.body.searchName
-  const fullName = searchName.split(" ")
-  const firstName = fullName[0]
-  const lastName = fullName[1]
+router.post("/search", async function (req, res, next) {
+  const searchName = req.body.searchName;
+  const fullName = searchName.split(" ");
+  const firstName = fullName[0];
+  const lastName = fullName[1];
 
-  await Customer.searchByName(firstName, lastName)
-
-  //return res.redirect(`/${customerId}/`);
- })
+  let customer = await Customer.searchByName(firstName, lastName);
+  if (Array.isArray(customer)) {
+    return res.render("searchCustomers.html", { customer });
+  }
+  let customerId = customer.id;
+  if (customerId) {
+    return res.redirect(`/${customerId}/`);
+  }
+});
 
 module.exports = router;
