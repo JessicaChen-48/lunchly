@@ -28,6 +28,7 @@ class Customer {
            FROM customers
            ORDER BY last_name, first_name`
     );
+    
     return results.rows.map((c) => new Customer(c));
   }
 
@@ -59,37 +60,27 @@ class Customer {
   /** get top 10 customers by most reservations */
 
   static async getTop10() {
-    const cusResults = await db.query(
-      `SELECT id,
-                  first_name AS "firstName",
-                  last_name  AS "lastName",
-                  phone,
-                  notes
-           FROM customers`
-    );
-    console.log(cusResults)
 
     const resResults = await db.query(
-      `SELECT customer_id, count(*)
+      ` SELECT customers.id, first_name, last_name, count(*)
       FROM reservations
-      GROUP BY customer_id
+      JOIN customers
+      ON reservations.customer_id=customers.id
+      GROUP BY first_name, last_name, customers.id
       ORDER BY count(*) DESC
       LIMIT 10`
     );
 
     const reservations = resResults.rows
-    console.log("class reservations:", reservations)
 
-    return reservations
+      console.log("res", reservations)
+      return reservations
+   //let map = reservations.map((c) => new Customer(c.id, c.first_name, c.last_name, notes=c.count));
+  //  let map = reservations.map((c) => new Customer(c));
+   
+  //  console.log("map", map)
 
-    // for (let r of reservations) {
 
-    // }
-
-    // [{customer_id: 54, count:6},{customer_id} ]
-
-    // customer.reservations = reservations
-    // return results.rows.map((c) => new Customer(c));
   }
 
   /** search for customer by name */
