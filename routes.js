@@ -32,21 +32,21 @@ router.post("/add/", async function (req, res, next) {
   return res.redirect(`/${customer.id}/`);
 });
 
-
 router.get("/top10/", async function (req, res, next) {
   let customers = await Customer.getTop10();
 
-   return res.render("top_10.html", {customers})
+  return res.render("top_10.html", { customers });
 });
 
-
-
 /** Show a customer, given their ID. */
+router.get("/reservations/:resid/edit", async function (req, res, next) {
+  const reservation = await Reservation.getReservation(req.params.resid);
+  return res.render("reservation_edit_form.html", { reservation });
+});
 
 router.get("/:id/", async function (req, res, next) {
-
   if (!parseInt(req.params.id)) {
-   //throw a 404 error 
+    //throw a 404 error
   }
 
   const customer = await Customer.get(req.params.id);
@@ -111,6 +111,5 @@ router.post("/search", async function (req, res, next) {
     return res.redirect(`/${customerId}/`);
   }
 });
-
 
 module.exports = router;

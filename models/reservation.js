@@ -27,17 +27,17 @@ class Reservation {
 
   static async getReservationsForCustomer(customerId) {
     const results = await db.query(
-          `SELECT id,
+      `SELECT id,
                   customer_id AS "customerId",
                   num_guests AS "numGuests",
                   start_at AS "startAt",
                   notes AS "notes"
            FROM reservations
            WHERE customer_id = $1`,
-        [customerId],
+      [customerId]
     );
 
-    return results.rows.map(row => new Reservation(row));
+    return results.rows.map((row) => new Reservation(row));
   }
 
   async save() {
@@ -48,16 +48,30 @@ class Reservation {
         RETURNING num_guests, start_at, notes`,
         [this.customerId, this.numGuests, this.startAt, this.notes]
       );
-      this.id = result.rows[0].id
+      this.id = result.rows[0].id;
+    } else {
+      await db.query(
+        `UPDATE reservations
+             SET customer_Id=$1,
+                 num_guests=$2,
+                 start_at=$3,
+                 notes=$4
+             WHERE id = $5`,
+        [this.customerId, this.numGuests, this.startAt, this.notes]
+      );
     }
   }
-
-
-
-
-
-
+  static async getReservation(res_id) {
+    const results = await db.query(
+      `SELECT id, customer_Id as "customerId", num_guests as "numGuests", 
+      start_at as "startAt", notes
+      FROM reservations
+      WHERE id =$1`,
+      [res_id]
+    );
+    let reservation = results.rows[0];
+    return new Reservation(reservation);
+  }
 }
-
 
 module.exports = Reservation;
